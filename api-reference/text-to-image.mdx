@@ -28,10 +28,12 @@ POST /v1/images/generations
   The AI model to use for generation.
   
   **Available models**:
-  - `nunchaku-qwen-image` - High quality, supports all tiers
-  - `nunchaku-flux.2-klein-9b` - Balanced performance
-  - `nunchaku-flux.2-klein-4b` - Fast generation
-  - `nunchaku-z-image-turbo` - Ultra-fast
+  - `nunchaku-flux.2-klein-4b-base` - Supports tiers: normal, fast, faster
+  - `nunchaku-flux.2-klein-4b` - Supports tiers: normal, fast
+  - `nunchaku-flux.2-klein-9b-base` - Supports tiers: normal, fast, faster
+  - `nunchaku-flux.2-klein-9b` - Supports tiers: normal, fast
+  - `nunchaku-qwen-image` - Supports tiers: normal, fast, faster, radically_fast
+  - `nunchaku-z-image-turbo` - Distilled model (no tier field needed)
   
   See [Models](/concepts/models) for detailed comparison.
 </ParamField>
@@ -102,109 +104,77 @@ POST /v1/images/generations
 
 ```bash cURL
 curl -X POST http://74.81.65.159:30371/v1/images/generations \
-  -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: YOUR_API_KEY" \
   -d '{
-    "model": "nunchaku-qwen-image",
-    "tier": "fast",
-    "prompt": "a red apple on a wooden table",
+    "model": "nunchaku-flux.2-klein-9b",
+    "tier": "normal",
+    "prompt": "A beautiful sunset over mountains",
+    "n": 1,
     "size": "1024x1024",
-    "response_format": "url",
-    "n": 1
+    "response_format": "b64_json",
+    "seed": 42
   }'
 ```
 
-```python Python
-import requests
-import os
+```python Python (Requests)
+import base64
+from pathlib import Path
 
-response = requests.post(
-    "http://74.81.65.159:30371/v1/images/generations",
-    headers={
-        "X-API-Key": os.environ["NUNCHAKU_API_KEY"],
-        "Content-Type": "application/json"
-    },
-    json={
-        "model": "nunchaku-qwen-image",
-        "tier": "fast",
-        "prompt": "a red apple on a wooden table",
-        "size": "1024x1024",
-        "response_format": "url"
-    }
-)
+import requests
+
+url = "http://74.81.65.159:30371/v1/images/generations"
+headers = {
+    "X-API-Key": "YOUR_API_KEY",
+    "Content-Type": "application/json",
+}
+
+payload = {
+    "model": "nunchaku-flux.2-klein-9b",
+    "tier": "normal",
+    "prompt": "A beautiful sunset over mountains",
+    "n": 1,
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42,
+}
+
+response = requests.post(url, json=payload, headers=headers)
+response.raise_for_status()
 
 result = response.json()
-image_url = result["data"][0]["url"]
-print(f"Generated image: {image_url}")
+image_b64 = result["data"][0]["b64_json"]
+Path("output.png").write_bytes(base64.b64decode(image_b64))
 ```
 
-```javascript JavaScript
-const response = await fetch(
-  "http://74.81.65.159:30371/v1/images/generations",
-  {
-    method: "POST",
-    headers: {
-      "X-API-Key": process.env.NUNCHAKU_API_KEY,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "nunchaku-qwen-image",
-      tier: "fast",
-      prompt: "a red apple on a wooden table",
-      size: "1024x1024",
-      response_format: "url"
-    })
-  }
-);
+```python Python (OpenAI SDK)
+import base64
+from pathlib import Path
 
-const result = await response.json();
-const imageUrl = result.data[0].url;
-console.log(`Generated image: ${imageUrl}`);
-```
+from openai import OpenAI
 
-```go Go
-package main
-
-import (
-    "bytes"
-    "encoding/json"
-    "fmt"
-    "net/http"
-    "os"
+# pip install openai
+client = OpenAI(
+    base_url="http://74.81.65.159:30371/v1",
+    api_key="YOUR_API_KEY",
 )
 
-func main() {
-    body := map[string]interface{}{
-        "model":           "nunchaku-qwen-image",
-        "tier":            "fast",
-        "prompt":          "a red apple on a wooden table",
-        "size":            "1024x1024",
-        "response_format": "url",
-    }
-    
-    jsonBody, _ := json.Marshal(body)
-    
-    req, _ := http.NewRequest(
-        "POST",
-        "http://74.81.65.159:30371/v1/images/generations",
-        bytes.NewBuffer(jsonBody),
-    )
-    
-    req.Header.Set("X-API-Key", os.Getenv("NUNCHAKU_API_KEY"))
-    req.Header.Set("Content-Type", "application/json")
-    
-    client := &http.Client{}
-    resp, _ := client.Do(req)
-    defer resp.Body.Close()
-    
-    var result map[string]interface{}
-    json.NewDecoder(resp.Body).Decode(&result)
-    
-    data := result["data"].([]interface{})
-    imageUrl := data[0].(map[string]interface{})["url"].(string)
-    fmt.Printf("Generated image: %s\n", imageUrl)
-}
+response = client.images.generate(
+    model="nunchaku-flux.2-klein-9b",
+    prompt="A beautiful sunset over mountains",
+    size="1024x1024",
+    response_format="b64_json",
+    n=1,
+    extra_body={
+        "tier": "normal",
+        "seed": 42,
+    },
+)
+
+image_b64 = response.data[0].b64_json
+Path("output.png").write_bytes(base64.b64decode(image_b64))
 ```
+
 
 </CodeGroup>
 
@@ -218,7 +188,7 @@ func main() {
       "url": "https://example.com/generated-image.png"
     }
   ],
-  "model": "nunchaku-qwen-image"
+  "model": "nunchaku-flux.2-klein-9b"
 }
 ```
 
@@ -232,7 +202,7 @@ func main() {
       "b64_json": "iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAYAAAB/HSuDAAAACXBIWXMAAA7EAAAOxAGVKw4b..."
     }
   ],
-  "model": "nunchaku-qwen-image"
+  "model": "nunchaku-flux.2-klein-9b"
 }
 ```
 
@@ -241,12 +211,12 @@ func main() {
 ```bash
 # Using jq and base64 to decode and save
 curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
-  -H "X-API-Key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: YOUR_API_KEY" \
   -d '{
-    "model": "nunchaku-qwen-image",
-    "tier": "fast",
-    "prompt": "a red apple on a wooden table",
+    "model": "nunchaku-flux.2-klein-9b",
+    "tier": "normal",
+    "prompt": "A beautiful sunset over mountains",
     "response_format": "b64_json"
   }' | jq -r '.data[0].b64_json' | base64 -d > output.png
 ```
