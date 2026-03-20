@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Nunchaku Image API",
   "colors": {
-    "primary": "#7C3AED",
-    "light": "#A78BFA",
-    "dark": "#5B21B6"
+    "primary": "#4a3aff",
+    "light": "#6e8bf3",
+    "dark": "#111143"
   },
   "favicon": "/favicon.svg",
   "navigation": {
