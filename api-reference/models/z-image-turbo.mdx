@@ -1,0 +1,253 @@
+---
+title: "Z-Image Turbo"
+description: "Ultra-fast image generation optimized for speed"
+---
+
+## Overview
+
+Z-Image Turbo is an ultra-fast image generation model optimized for maximum speed. It's ideal for applications requiring real-time image generation or very high throughput.
+
+## Available model
+
+<Card title="nunchaku-z-image-turbo" icon="rocket">
+  **Ultra-fast text-to-image generation**
+  
+  - Fastest generation times
+  - Low latency
+  - Suitable for real-time applications
+  - Good quality output
+</Card>
+
+<Warning>
+  Z-Image Turbo is only available for text-to-image generation. For image editing, use Qwen or FLUX Klein models.
+</Warning>
+
+## Performance characteristics
+
+| Tier | Generation Time | Quality | Best Use Case |
+|------|----------------|---------|---------------|
+| `fast` | ~0.5-1s | Good | Real-time apps (recommended) |
+| `normal` | ~1-2s | Better | Quick quality outputs |
+
+<Note>
+  Z-Image Turbo supports only `fast` and `normal` tiers. The `faster` and `radically_fast` tiers are not available.
+</Note>
+
+## Example usage
+
+### Basic generation
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-z-image-turbo",
+    "tier": "fast",
+    "prompt": "a red apple on a wooden table",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > zimage-apple.png
+```
+
+### Real-time generation example
+
+```bash
+# Fast generation for real-time preview
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-z-image-turbo",
+    "tier": "fast",
+    "prompt": "abstract background with geometric shapes",
+    "size": "1024x1024",
+    "response_format": "b64_json"
+  }' | jq -r '.data[0].b64_json' | base64 -d > zimage-background.png
+```
+
+## Best use cases
+
+<AccordionGroup>
+  <Accordion title="Real-time applications" icon="clock">
+    Perfect for applications that need to generate images in real-time, such as live preview features or interactive tools.
+  </Accordion>
+  
+  <Accordion title="High-throughput pipelines" icon="conveyor-belt">
+    Ideal for processing large volumes of image generation requests quickly.
+  </Accordion>
+  
+  <Accordion title="Rapid prototyping" icon="pen-ruler">
+    Great for quickly iterating on ideas and testing different prompts.
+  </Accordion>
+  
+  <Accordion title="Background generation" icon="image">
+    Suitable for generating backgrounds, patterns, or textures where speed is more important than maximum detail.
+  </Accordion>
+</AccordionGroup>
+
+## When to use Z-Image Turbo
+
+### Choose Z-Image Turbo when:
+
+- ✅ Speed is the primary requirement
+- ✅ Building real-time interactive features
+- ✅ Processing high volumes of requests
+- ✅ Generating backgrounds or simple compositions
+- ✅ Latency is critical for user experience
+
+### Choose other models when:
+
+- ❌ Maximum quality is required
+- ❌ Generating complex, detailed scenes
+- ❌ Need image editing capabilities
+- ❌ Creating final production assets
+- ❌ Working with intricate prompts
+
+## Comparison with other models
+
+| Feature | Z-Image Turbo | FLUX Klein 4B | Qwen Image |
+|---------|--------------|---------------|------------|
+| **Speed** | Fastest | Very Fast | Medium |
+| **Quality** | Good | Good-High | Highest |
+| **Available Tiers** | 2 | 3 | 4 |
+| **Editing** | ❌ No | ✅ Yes | ✅ Yes |
+| **Best for** | Real-time | Balanced speed | Quality |
+
+## Programming example
+
+<CodeGroup>
+
+```python Python
+import requests
+import base64
+import os
+import time
+
+def generate_realtime_preview(prompt):
+    """Generate a quick preview image using Z-Image Turbo."""
+    start_time = time.time()
+    
+    response = requests.post(
+        "http://74.81.65.159:30371/v1/images/generations",
+        headers={
+            "X-API-Key": os.environ["NUNCHAKU_API_KEY"],
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "nunchaku-z-image-turbo",
+            "tier": "fast",
+            "prompt": prompt,
+            "size": "1024x1024",
+            "response_format": "b64_json"
+        }
+    )
+    
+    elapsed = time.time() - start_time
+    result = response.json()
+    image_b64 = result["data"][0]["b64_json"]
+    
+    print(f"Generated in {elapsed:.2f}s")
+    return base64.b64decode(image_b64)
+
+# Example: Real-time preview as user types
+prompts = [
+    "a cat",
+    "a cat sitting",
+    "a cat sitting on a chair",
+    "a cat sitting on a red chair"
+]
+
+for i, prompt in enumerate(prompts):
+    print(f"Generating preview {i+1}: {prompt}")
+    image_data = generate_realtime_preview(prompt)
+    with open(f"preview_{i}.png", "wb") as f:
+        f.write(image_data)
+```
+
+```javascript JavaScript
+import fetch from 'node-fetch';
+import fs from 'fs';
+
+async function generateRealtimePreview(prompt) {
+  const startTime = Date.now();
+  
+  const response = await fetch(
+    'http://74.81.65.159:30371/v1/images/generations',
+    {
+      method: 'POST',
+      headers: {
+        'X-API-Key': process.env.NUNCHAKU_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'nunchaku-z-image-turbo',
+        tier: 'fast',
+        prompt,
+        size: '1024x1024',
+        response_format: 'b64_json'
+      })
+    }
+  );
+  
+  const elapsed = Date.now() - startTime;
+  const result = await response.json();
+  const imageB64 = result.data[0].b64_json;
+  
+  console.log(`Generated in ${(elapsed/1000).toFixed(2)}s`);
+  return Buffer.from(imageB64, 'base64');
+}
+
+// Example: Real-time preview
+const prompts = [
+  'a cat',
+  'a cat sitting',
+  'a cat sitting on a chair',
+  'a cat sitting on a red chair'
+];
+
+for (let i = 0; i < prompts.length; i++) {
+  console.log(`Generating preview ${i+1}: ${prompts[i]}`);
+  const imageBuffer = await generateRealtimePreview(prompts[i]);
+  fs.writeFileSync(`preview_${i}.png`, imageBuffer);
+}
+```
+
+</CodeGroup>
+
+## Best practices
+
+<Tip>
+  **Optimize prompts**: Keep prompts clear and relatively simple. Z-Image Turbo is optimized for speed and works best with straightforward descriptions.
+</Tip>
+
+<Tip>
+  **Use fast tier**: The `fast` tier provides the best speed-to-quality ratio for real-time applications.
+</Tip>
+
+<Tip>
+  **Consider fallbacks**: For critical applications, consider using Z-Image Turbo for previews and a higher-quality model for final outputs.
+</Tip>
+
+## Limitations
+
+- **Text-to-image only**: No image editing capabilities
+- **Limited tiers**: Only `fast` and `normal` tiers available
+- **Quality tradeoff**: Prioritizes speed over maximum detail and refinement
+
+## Related resources
+
+<CardGroup cols={3}>
+  <Card title="Models Overview" icon="layer-group" href="/concepts/models">
+    Compare all available models
+  </Card>
+  
+  <Card title="Performance Tiers" icon="gauge-high" href="/concepts/tiers">
+    Understanding tier options
+  </Card>
+  
+  <Card title="Examples" icon="code" href="/examples/text-to-image">
+    View code examples
+  </Card>
+</CardGroup>

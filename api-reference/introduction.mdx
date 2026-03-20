@@ -1,33 +1,246 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'API Reference'
+description: 'Complete reference for the Nunchaku Image Generation API'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Overview
 
-## Welcome
+The Nunchaku Image API provides a simple REST interface for AI-powered image generation and editing. The API is designed to be OpenAI-compatible, making it easy to integrate into existing workflows.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+## Base URL
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+```
+http://74.81.65.159:30371
+```
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API requests require authentication using an API key passed in the `X-API-Key` header.
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+See [Authentication](/authentication) for detailed information.
+
+## Available endpoints
+
+<CardGroup cols={2}>
+  <Card title="Text-to-image" icon="wand-magic-sparkles" href="/api-reference/text-to-image">
+    Generate images from text descriptions
+    
+    `POST /v1/images/generations`
+  </Card>
+  
+  <Card title="Image-to-image" icon="paintbrush" href="/api-reference/image-to-image">
+    Edit and transform existing images
+    
+    `POST /v1/images/edits`
+  </Card>
+</CardGroup>
+
+## Request format
+
+All requests must:
+- Use `POST` method
+- Include `X-API-Key` header for authentication
+- Include `Content-Type: application/json` header
+- Send JSON payload in request body
+
+### Example request
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "a red apple on a wooden table",
+    "size": "1024x1024",
+    "response_format": "b64_json"
+  }'
+```
+
+## Response format
+
+Successful responses return JSON with the following structure:
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+{
+  "created": 1234567890,
+  "data": [
+    {
+      "url": "https://example.com/image.png",
+      // or
+      "b64_json": "iVBORw0KGgoAAAANSUhEUgAA..."
+    }
+  ],
+  "model": "nunchaku-qwen-image"
+}
 ```
+
+### Response fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `created` | integer | Unix timestamp of when the image was generated |
+| `data` | array | Array of generated images |
+| `data[].url` | string | URL to the generated image (if `response_format: "url"`) |
+| `data[].b64_json` | string | Base64-encoded image data (if `response_format: "b64_json"`) |
+| `model` | string | The model used for generation |
+
+## Error responses
+
+Errors return JSON with an `error` object:
+
+```json
+{
+  "error": {
+    "message": "Invalid model specified",
+    "type": "invalid_request_error",
+    "code": "invalid_model"
+  }
+}
+```
+
+### Common error codes
+
+| Status Code | Error Type | Description |
+|-------------|------------|-------------|
+| 400 | `invalid_request_error` | Invalid parameters or request format |
+| 401 | `authentication_error` | Missing or invalid API key |
+| 429 | `rate_limit_error` | Too many requests |
+| 500 | `api_error` | Internal server error |
+
+## Rate limiting
+
+The API implements rate limiting to ensure fair usage. If you exceed the rate limit, you'll receive a 429 status code.
+
+<Note>
+  Contact your administrator for information about rate limits specific to your API key.
+</Note>
+
+## Models and parameters
+
+<CardGroup cols={3}>
+  <Card title="Models" icon="layer-group" href="/concepts/models">
+    Available AI models
+  </Card>
+  
+  <Card title="Performance Tiers" icon="gauge-high" href="/concepts/tiers">
+    Speed/quality tradeoffs
+  </Card>
+  
+  <Card title="Parameters" icon="sliders" href="/concepts/parameters">
+    Request parameters
+  </Card>
+</CardGroup>
+
+## SDKs and libraries
+
+The API is OpenAI-compatible, so you can use OpenAI client libraries with minor modifications:
+
+<CodeGroup>
+
+```python Python
+import requests
+import os
+
+def generate_image(prompt):
+    response = requests.post(
+        "http://74.81.65.159:30371/v1/images/generations",
+        headers={
+            "X-API-Key": os.environ["NUNCHAKU_API_KEY"],
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "nunchaku-qwen-image",
+            "prompt": prompt,
+            "tier": "fast"
+        }
+    )
+    return response.json()
+```
+
+```javascript JavaScript
+async function generateImage(prompt) {
+  const response = await fetch(
+    "http://74.81.65.159:30371/v1/images/generations",
+    {
+      method: "POST",
+      headers: {
+        "X-API-Key": process.env.NUNCHAKU_API_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "nunchaku-qwen-image",
+        prompt,
+        tier: "fast"
+      })
+    }
+  );
+  
+  return await response.json();
+}
+```
+
+```go Go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "net/http"
+    "os"
+)
+
+func generateImage(prompt string) (map[string]interface{}, error) {
+    body := map[string]interface{}{
+        "model":  "nunchaku-qwen-image",
+        "prompt": prompt,
+        "tier":   "fast",
+    }
+    
+    jsonBody, _ := json.Marshal(body)
+    
+    req, _ := http.NewRequest(
+        "POST",
+        "http://74.81.65.159:30371/v1/images/generations",
+        bytes.NewBuffer(jsonBody),
+    )
+    
+    req.Header.Set("X-API-Key", os.Getenv("NUNCHAKU_API_KEY"))
+    req.Header.Set("Content-Type", "application/json")
+    
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    
+    // Handle response...
+    return nil, err
+}
+```
+
+</CodeGroup>
+
+## Next steps
+
+<Steps>
+  <Step title="Get your API key">
+    Contact your administrator or sign up to receive an API key
+  </Step>
+  
+  <Step title="Try the quickstart">
+    Follow the [quickstart guide](/quickstart) to make your first request
+  </Step>
+  
+  <Step title="Explore endpoints">
+    Learn about [text-to-image](/api-reference/text-to-image) and [image-to-image](/api-reference/image-to-image) endpoints
+  </Step>
+  
+  <Step title="Review examples">
+    Check out [code examples](/examples/text-to-image) for common use cases
+  </Step>
+</Steps>

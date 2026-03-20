@@ -1,0 +1,188 @@
+---
+title: "Authentication"
+description: "Learn how to authenticate your API requests"
+---
+
+## API Key authentication
+
+The Nunchaku Image API uses API key authentication. All requests must include your API key in the request headers.
+
+### Getting your API key
+
+Contact your administrator or sign up through the API portal to receive your unique API key.
+
+<Warning>
+  **Keep your API key secure!** Never share it publicly or commit it to version control. Treat it like a password.
+</Warning>
+
+## Making authenticated requests
+
+Include your API key in the `X-API-Key` header with every request:
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "prompt": "a beautiful sunset"
+  }'
+```
+
+## Request headers
+
+All API requests require two headers:
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `X-API-Key` | Your API key | Required for authentication |
+| `Content-Type` | `application/json` | Specifies the request body format |
+
+## Error responses
+
+### Invalid API key
+
+If your API key is missing or invalid, you'll receive a 401 Unauthorized error:
+
+```json
+{
+  "error": {
+    "message": "Invalid API key",
+    "type": "authentication_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+### Missing API key
+
+If you forget to include the API key header:
+
+```json
+{
+  "error": {
+    "message": "No API key provided",
+    "type": "authentication_error",
+    "code": "missing_api_key"
+  }
+}
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Store API keys securely" icon="lock">
+    - Use environment variables to store API keys
+    - Never hardcode keys in your source code
+    - Use secret management systems in production
+    - Rotate keys periodically
+    
+    ```bash
+    # Store in environment variable
+    export NUNCHAKU_API_KEY="your-api-key-here"
+    
+    # Use in requests
+    curl -X POST http://74.81.65.159:30371/v1/images/generations \
+      -H "X-API-Key: $NUNCHAKU_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"model": "nunchaku-qwen-image", "prompt": "test"}'
+    ```
+  </Accordion>
+  
+  <Accordion title="Use environment-specific keys" icon="code-branch">
+    Maintain separate API keys for different environments:
+    - Development key for testing
+    - Staging key for pre-production
+    - Production key for live applications
+  </Accordion>
+  
+  <Accordion title="Monitor API usage" icon="chart-line">
+    Track your API usage to:
+    - Detect unauthorized access
+    - Optimize costs
+    - Identify usage patterns
+    - Plan capacity needs
+  </Accordion>
+</AccordionGroup>
+
+## Programming language examples
+
+<CodeGroup>
+
+```python Python
+import os
+import requests
+
+api_key = os.environ.get('NUNCHAKU_API_KEY')
+headers = {
+    'X-API-Key': api_key,
+    'Content-Type': 'application/json'
+}
+
+response = requests.post(
+    'http://74.81.65.159:30371/v1/images/generations',
+    headers=headers,
+    json={
+        'model': 'nunchaku-qwen-image',
+        'prompt': 'a serene landscape'
+    }
+)
+```
+
+```javascript JavaScript
+const apiKey = process.env.NUNCHAKU_API_KEY;
+
+const response = await fetch('http://74.81.65.159:30371/v1/images/generations', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': apiKey,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    model: 'nunchaku-qwen-image',
+    prompt: 'a serene landscape'
+  })
+});
+```
+
+```go Go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "net/http"
+    "os"
+)
+
+func main() {
+    apiKey := os.Getenv("NUNCHAKU_API_KEY")
+    
+    body := map[string]interface{}{
+        "model": "nunchaku-qwen-image",
+        "prompt": "a serene landscape",
+    }
+    
+    jsonBody, _ := json.Marshal(body)
+    
+    req, _ := http.NewRequest("POST", 
+        "http://74.81.65.159:30371/v1/images/generations",
+        bytes.NewBuffer(jsonBody))
+    
+    req.Header.Set("X-API-Key", apiKey)
+    req.Header.Set("Content-Type", "application/json")
+    
+    client := &http.Client{}
+    resp, _ := client.Do(req)
+}
+```
+
+</CodeGroup>
+
+## Rate limiting
+
+The API may implement rate limiting to ensure fair usage. If you exceed rate limits, you'll receive a 429 Too Many Requests error.
+
+<Note>
+  Contact your administrator for information about rate limits specific to your API key.
+</Note>

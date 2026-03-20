@@ -1,0 +1,202 @@
+---
+title: "FLUX Klein Models"
+description: "Fast and efficient image generation with FLUX Klein variants"
+---
+
+## Overview
+
+FLUX Klein models offer excellent performance with faster generation times compared to Qwen models. Available in 4B and 9B parameter variants, these models provide a great balance between quality and speed.
+
+## Available models
+
+### 9B Parameter Models (Recommended)
+
+<CardGroup cols={2}>
+  <Card title="nunchaku-flux.2-klein-9b" icon="bolt">
+    **9B text-to-image**
+    
+    - Balanced performance
+    - Good quality output
+    - Fast generation
+  </Card>
+  
+  <Card title="nunchaku-flux.2-klein-9b-edit" icon="paintbrush">
+    **9B image editing**
+    
+    - Fast editing
+    - Quality transformations
+    - Efficient processing
+  </Card>
+</CardGroup>
+
+### 4B Parameter Models (Fastest)
+
+<CardGroup cols={2}>
+  <Card title="nunchaku-flux.2-klein-4b" icon="rocket">
+    **4B text-to-image**
+    
+    - Ultra-fast generation
+    - Good for simple images
+    - Highest throughput
+  </Card>
+  
+  <Card title="nunchaku-flux.2-klein-4b-edit" icon="paintbrush-pencil">
+    **4B image editing**
+    
+    - Fastest editing
+    - Quick transformations
+    - Batch processing
+  </Card>
+</CardGroup>
+
+### Base Variants
+
+Additional base model variants are available:
+- `nunchaku-flux.2-klein-9b-base`
+- `nunchaku-flux.2-klein-9b-base-edit`
+- `nunchaku-flux.2-klein-4b-base`
+- `nunchaku-flux.2-klein-4b-base-edit`
+
+## Performance characteristics
+
+### 9B Models
+
+| Tier | Generation Time | Quality | Best Use Case |
+|------|----------------|---------|---------------|
+| `faster` | ~1-2s | Better | Quick iterations |
+| `fast` | ~2-3s | High | Production use (recommended) |
+| `normal` | ~3-5s | Very High | Final outputs |
+
+### 4B Models
+
+| Tier | Generation Time | Quality | Best Use Case |
+|------|----------------|---------|---------------|
+| `faster` | ~0.5-1s | Good | Real-time apps, rapid generation |
+| `fast` | ~1-2s | Better | Quick production work |
+| `normal` | ~2-3s | High | Quality outputs with speed |
+
+<Note>
+  FLUX Klein models do not support the `radically_fast` tier.
+</Note>
+
+## Example usage
+
+### FLUX Klein 9B generation
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-flux.2-klein-9b",
+    "tier": "fast",
+    "prompt": "cozy coffee shop interior with vintage furniture",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > flux9b-coffeeshop.png
+```
+
+### FLUX Klein 4B generation
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-flux.2-klein-4b",
+    "tier": "faster",
+    "prompt": "simple minimalist icon design",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > flux4b-icon.png
+```
+
+### FLUX Klein editing
+
+```bash
+IMG_B64=$(base64 -w 0 input.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-flux.2-klein-9b-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add colorful flowers in the foreground\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > flux9b-flowers.png
+```
+
+## When to use FLUX Klein
+
+<AccordionGroup>
+  <Accordion title="Balanced performance needs" icon="scale-balanced">
+    FLUX Klein 9B provides excellent quality with faster generation times than Qwen, making it ideal for most production use cases.
+  </Accordion>
+  
+  <Accordion title="High-throughput applications" icon="gauge-high">
+    FLUX Klein 4B offers the fastest generation for applications requiring high throughput or real-time image generation.
+  </Accordion>
+  
+  <Accordion title="Batch processing" icon="layer-group">
+    The faster generation times make FLUX Klein models excellent for processing large numbers of images.
+  </Accordion>
+  
+  <Accordion title="Cost optimization" icon="dollar-sign">
+    Faster generation times can translate to lower costs for high-volume applications.
+  </Accordion>
+</AccordionGroup>
+
+## Model comparison
+
+### 9B vs 4B
+
+| Feature | 9B Models | 4B Models |
+|---------|-----------|-----------|
+| **Quality** | High | Good |
+| **Speed** | Fast | Very Fast |
+| **Detail** | Better | Good |
+| **Complex prompts** | Better | Good |
+| **Best for** | Balanced work | Speed priority |
+
+### FLUX vs Qwen
+
+| Feature | FLUX Klein | Qwen |
+|---------|------------|------|
+| **Speed** | Faster | Slower |
+| **Quality** | High | Highest |
+| **Detail** | Good | Excellent |
+| **Tiers** | 3 tiers | 4 tiers (includes radically_fast) |
+
+## Best practices
+
+<Tip>
+  **Choose 9B for production**: The 9B variant offers the best balance of quality and speed for most applications.
+</Tip>
+
+<Tip>
+  **Use 4B for speed**: When speed is critical and prompts are relatively simple, the 4B variant delivers excellent performance.
+</Tip>
+
+<Tip>
+  **Tier selection**: Start with `tier: "fast"` for the 9B model and `tier: "faster"` for the 4B model.
+</Tip>
+
+## Related resources
+
+<CardGroup cols={3}>
+  <Card title="Models Overview" icon="layer-group" href="/concepts/models">
+    Compare all available models
+  </Card>
+  
+  <Card title="Performance Tiers" icon="gauge-high" href="/concepts/tiers">
+    Understanding tier options
+  </Card>
+  
+  <Card title="Examples" icon="code" href="/examples/text-to-image">
+    View code examples
+  </Card>
+</CardGroup>

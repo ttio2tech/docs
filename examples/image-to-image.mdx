@@ -1,0 +1,633 @@
+---
+title: "Image-to-Image Examples"
+description: "Practical examples for editing and transforming images"
+---
+
+## Getting started
+
+This page provides practical examples for editing and transforming existing images using different models and techniques.
+
+## Basic image editing
+
+### Simple edit with data URI
+
+```bash
+# First, encode your input image
+IMG_B64=$(base64 -w 0 input.png)
+
+# Then make the edit request
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add a sun in the sky\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"size\": \"1024x1024\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > output.png
+```
+
+### Complete example with all parameters
+
+```bash
+IMG_B64=$(base64 -w 0 input.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit-2509\",
+    \"tier\": \"fast\",
+    \"prompt\": \"enhance the colors to be more vibrant and add dramatic lighting\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"size\": \"1024x1024\",
+    \"n\": 1,
+    \"response_format\": \"b64_json\",
+    \"seed\": 42
+  }" | jq -r '.data[0].b64_json' | base64 -d > enhanced.png
+```
+
+## Model-specific examples
+
+### Qwen Image Edit (Highest Quality)
+
+Best for complex edits and highest quality:
+
+```bash
+IMG_B64=$(base64 -w 0 landscape.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"normal\",
+    \"prompt\": \"transform into a golden hour scene with warm sunset lighting and add dramatic clouds\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\",
+    \"seed\": 42
+  }" | jq -r '.data[0].b64_json' | base64 -d > qwen-enhanced.png
+```
+
+### Qwen Image Edit 2509 (Enhanced Model)
+
+Enhanced variant with improved capabilities:
+
+```bash
+IMG_B64=$(base64 -w 0 portrait.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit-2509\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add a professional bokeh background and improve skin tones\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > qwen2509-portrait.png
+```
+
+### FLUX Klein 9B Edit (Fast Editing)
+
+Good balance of speed and quality:
+
+```bash
+IMG_B64=$(base64 -w 0 photo.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-flux.2-klein-9b-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add colorful flowers in the foreground\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > flux9b-flowers.png
+```
+
+### FLUX Klein 4B Edit (Ultra-Fast)
+
+Fastest editing for simple transformations:
+
+```bash
+IMG_B64=$(base64 -w 0 simple.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-flux.2-klein-4b-edit\",
+    \"tier\": \"faster\",
+    \"prompt\": \"make the colors brighter\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > flux4b-bright.png
+```
+
+## Tier comparison
+
+### Same edit, different tiers
+
+```bash
+IMG_B64=$(base64 -w 0 input.png)
+
+# Radically fast - fastest editing
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"radically_fast\",
+    \"prompt\": \"add a sun in the sky\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\",
+    \"seed\": 42
+  }" | jq -r '.data[0].b64_json' | base64 -d > edit-rf.png
+
+# Fast - balanced (recommended)
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add a sun in the sky\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\",
+    \"seed\": 42
+  }" | jq -r '.data[0].b64_json' | base64 -d > edit-fast.png
+
+# Normal - highest quality
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"normal\",
+    \"prompt\": \"add a sun in the sky\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\",
+    \"seed\": 42
+  }" | jq -r '.data[0].b64_json' | base64 -d > edit-normal.png
+```
+
+## Common editing use cases
+
+### Background replacement
+
+```bash
+IMG_B64=$(base64 -w 0 subject.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"replace the background with a modern office with large windows overlooking a city skyline\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > new-background.png
+```
+
+### Object addition
+
+```bash
+IMG_B64=$(base64 -w 0 scene.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit-2509\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add colorful hot air balloons floating in the sky\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > with-balloons.png
+```
+
+### Object removal
+
+```bash
+IMG_B64=$(base64 -w 0 cluttered.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"remove all people from the image and fill in the background naturally\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > clean.png
+```
+
+### Style transformation
+
+```bash
+IMG_B64=$(base64 -w 0 photo.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"normal\",
+    \"prompt\": \"transform into an oil painting with impressionist brush strokes and vibrant colors\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > oil-painting.png
+```
+
+### Color and lighting enhancement
+
+```bash
+IMG_B64=$(base64 -w 0 dull.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"enhance colors to be more vibrant, add golden hour lighting, increase contrast and saturation\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > enhanced.png
+```
+
+### Seasonal transformation
+
+```bash
+IMG_B64=$(base64 -w 0 landscape.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit-2509\",
+    \"tier\": \"fast\",
+    \"prompt\": \"transform the scene to winter with snow covering the ground and trees, grey overcast sky\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > winter.png
+```
+
+## Batch editing
+
+### Edit multiple images with same prompt
+
+```bash
+#!/bin/bash
+
+PROMPT="add a sun in the sky and make colors more vibrant"
+
+# Process all PNG files in directory
+for input_file in input_*.png; do
+  echo "Editing ${input_file}..."
+  
+  IMG_B64=$(base64 -w 0 "${input_file}")
+  output_file="edited_${input_file}"
+  
+  curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+    -H "X-API-Key: YOUR_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"model\": \"nunchaku-flux.2-klein-4b-edit\",
+      \"tier\": \"faster\",
+      \"prompt\": \"${PROMPT}\",
+      \"url\": \"data:image/png;base64,${IMG_B64}\",
+      \"response_format\": \"b64_json\"
+    }" | jq -r '.data[0].b64_json' | base64 -d > "${output_file}"
+  
+  echo "Saved ${output_file}"
+done
+```
+
+### Sequential edits pipeline
+
+```bash
+#!/bin/bash
+
+INPUT="original.png"
+
+# Step 1: Enhance colors
+echo "Step 1: Enhancing colors..."
+IMG_B64=$(base64 -w 0 "${INPUT}")
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"enhance colors and increase saturation\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > step1.png
+
+# Step 2: Add lighting effects
+echo "Step 2: Adding lighting effects..."
+IMG_B64=$(base64 -w 0 step1.png)
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add dramatic rim lighting from the left side\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > step2.png
+
+# Step 3: Add final elements
+echo "Step 3: Adding final elements..."
+IMG_B64=$(base64 -w 0 step2.png)
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add subtle lens flare and atmospheric haze\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > final.png
+
+echo "Pipeline complete! Check final.png"
+```
+
+## Programming language examples
+
+<CodeGroup>
+
+```python Python
+import requests
+import base64
+import os
+
+def edit_image(input_path, prompt, output_path, model="nunchaku-qwen-image-edit", tier="fast"):
+    """Edit an image and save the result."""
+    # Read and encode input image
+    with open(input_path, "rb") as f:
+        img_b64 = base64.b64encode(f.read()).decode()
+    
+    response = requests.post(
+        "http://74.81.65.159:30371/v1/images/edits",
+        headers={
+            "X-API-Key": os.environ["NUNCHAKU_API_KEY"],
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": model,
+            "tier": tier,
+            "prompt": prompt,
+            "url": f"data:image/png;base64,{img_b64}",
+            "response_format": "b64_json"
+        }
+    )
+    
+    result = response.json()
+    edited_b64 = result["data"][0]["b64_json"]
+    
+    # Decode and save
+    with open(output_path, "wb") as f:
+        f.write(base64.b64decode(edited_b64))
+    
+    print(f"Saved edited image to {output_path}")
+
+# Example usage: batch edit multiple images
+edits = [
+    ("photo1.png", "add a sun in the sky", "edited1.png"),
+    ("photo2.png", "make colors more vibrant", "edited2.png"),
+    ("photo3.png", "add dramatic lighting", "edited3.png")
+]
+
+for input_file, prompt, output_file in edits:
+    print(f"Editing {input_file}...")
+    edit_image(input_file, prompt, output_file)
+```
+
+```javascript JavaScript
+import fetch from 'node-fetch';
+import fs from 'fs';
+
+async function editImage(inputPath, prompt, outputPath, options = {}) {
+  const {
+    model = 'nunchaku-qwen-image-edit',
+    tier = 'fast'
+  } = options;
+  
+  // Read and encode input image
+  const inputImage = fs.readFileSync(inputPath);
+  const imgB64 = inputImage.toString('base64');
+  
+  const response = await fetch(
+    'http://74.81.65.159:30371/v1/images/edits',
+    {
+      method: 'POST',
+      headers: {
+        'X-API-Key': process.env.NUNCHAKU_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model,
+        tier,
+        prompt,
+        url: `data:image/png;base64,${imgB64}`,
+        response_format: 'b64_json'
+      })
+    }
+  );
+  
+  const result = await response.json();
+  const editedB64 = result.data[0].b64_json;
+  
+  // Decode and save
+  const imageBuffer = Buffer.from(editedB64, 'base64');
+  fs.writeFileSync(outputPath, imageBuffer);
+  
+  console.log(`Saved edited image to ${outputPath}`);
+}
+
+// Example usage: batch edit
+const edits = [
+  { input: 'photo1.png', prompt: 'add a sun in the sky', output: 'edited1.png' },
+  { input: 'photo2.png', prompt: 'make colors more vibrant', output: 'edited2.png' },
+  { input: 'photo3.png', prompt: 'add dramatic lighting', output: 'edited3.png' }
+];
+
+for (const edit of edits) {
+  console.log(`Editing ${edit.input}...`);
+  await editImage(edit.input, edit.prompt, edit.output);
+}
+```
+
+</CodeGroup>
+
+## Advanced techniques
+
+### Reproducible editing
+
+Use the same seed for consistent edits:
+
+```bash
+IMG_B64=$(base64 -w 0 input.png)
+
+# These will produce similar (not identical) results
+curl -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"prompt\": \"add a sun in the sky\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"seed\": 12345
+  }"
+```
+
+### A/B testing edit prompts
+
+Test different editing approaches:
+
+```bash
+IMG_B64=$(base64 -w 0 input.png)
+
+# Version A: Simple prompt
+curl -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"prompt\": \"improve lighting\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"seed\": 42
+  }"
+
+# Version B: Detailed prompt
+curl -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"prompt\": \"add warm golden hour lighting from the left side with soft shadows and enhanced contrast\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"seed\": 42
+  }"
+```
+
+### Iterative refinement
+
+Apply edits iteratively for complex transformations:
+
+```python
+import requests
+import base64
+import os
+
+def edit_image_iterative(input_path, prompts, output_path):
+    """Apply multiple edits sequentially."""
+    current_image_path = input_path
+    
+    for i, prompt in enumerate(prompts):
+        print(f"Step {i+1}/{len(prompts)}: {prompt}")
+        
+        # Read current image
+        with open(current_image_path, "rb") as f:
+            img_b64 = base64.b64encode(f.read()).decode()
+        
+        # Apply edit
+        response = requests.post(
+            "http://74.81.65.159:30371/v1/images/edits",
+            headers={
+                "X-API-Key": os.environ["NUNCHAKU_API_KEY"],
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "nunchaku-qwen-image-edit",
+                "tier": "fast",
+                "prompt": prompt,
+                "url": f"data:image/png;base64,{img_b64}",
+                "response_format": "b64_json"
+            }
+        )
+        
+        result = response.json()
+        edited_b64 = result["data"][0]["b64_json"]
+        
+        # Save intermediate result
+        temp_path = f"step_{i+1}.png"
+        with open(temp_path, "wb") as f:
+            f.write(base64.b64decode(edited_b64))
+        
+        current_image_path = temp_path
+    
+    # Rename final result
+    os.rename(current_image_path, output_path)
+    print(f"Final result saved to {output_path}")
+
+# Example: Multi-step transformation
+prompts = [
+    "enhance colors and increase saturation",
+    "add golden hour lighting with warm tones",
+    "add dramatic clouds in the sky",
+    "increase overall contrast and sharpness"
+]
+
+edit_image_iterative("input.png", prompts, "final_output.png")
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Effective edit prompts" icon="pen">
+    - Be specific about what to add, remove, or change
+    - Describe the desired outcome clearly
+    - For complex edits, break into multiple steps
+    - Use descriptive language for style and atmosphere
+    - Test different prompt variations
+  </Accordion>
+  
+  <Accordion title="Image preparation" icon="image">
+    - Use high-quality input images
+    - Ensure images are under 10MB
+    - Supported formats: PNG, JPEG, WebP
+    - Higher resolution inputs generally yield better results
+  </Accordion>
+  
+  <Accordion title="Model selection" icon="layer-group">
+    - Use Qwen models for highest quality edits
+    - Use FLUX Klein models for faster editing
+    - Consider the complexity of your edit
+    - Match model capabilities to your needs
+  </Accordion>
+  
+  <Accordion title="Performance optimization" icon="gauge">
+    - Use `tier: "fast"` for most edits
+    - Use `faster` for batch processing
+    - Use `normal` for final high-quality outputs
+    - Consider breaking complex edits into simpler steps
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Text-to-Image Examples" icon="wand-magic-sparkles" href="/examples/text-to-image">
+    Learn how to generate images from scratch
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api-reference/image-to-image">
+    Complete API documentation
+  </Card>
+  
+  <Card title="Models Guide" icon="layer-group" href="/concepts/models">
+    Detailed model comparison
+  </Card>
+  
+  <Card title="Performance Tiers" icon="gauge-high" href="/concepts/tiers">
+    Understanding speed/quality tradeoffs
+  </Card>
+</CardGroup>

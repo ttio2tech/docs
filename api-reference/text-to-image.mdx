@@ -1,0 +1,381 @@
+---
+title: "Text-to-Image"
+description: "Generate images from text descriptions"
+api: "POST http://74.81.65.159:30371/v1/images/generations"
+---
+
+## Endpoint
+
+Generate images from text descriptions using AI models.
+
+```
+POST /v1/images/generations
+```
+
+## Authentication
+
+<ParamField header="X-API-Key" type="string" required>
+  Your API key for authentication
+</ParamField>
+
+<ParamField header="Content-Type" type="string" required>
+  Must be `application/json`
+</ParamField>
+
+## Request body
+
+<ParamField body="model" type="string" required>
+  The AI model to use for generation.
+  
+  **Available models**:
+  - `nunchaku-qwen-image` - High quality, supports all tiers
+  - `nunchaku-flux.2-klein-9b` - Balanced performance
+  - `nunchaku-flux.2-klein-4b` - Fast generation
+  - `nunchaku-z-image-turbo` - Ultra-fast
+  
+  See [Models](/concepts/models) for detailed comparison.
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  A text description of the desired image. Be specific and descriptive for best results.
+  
+  **Example**: `"professional product photo of red wireless headphones on white background with soft studio lighting"`
+</ParamField>
+
+<ParamField body="tier" type="string" default="fast">
+  Performance tier controlling speed/quality tradeoff.
+  
+  **Options**: `radically_fast`, `faster`, `fast`, `normal`
+  
+  See [Performance Tiers](/concepts/tiers) for details.
+</ParamField>
+
+<ParamField body="size" type="string" default="1024x1024">
+  Image dimensions in format `widthxheight`.
+  
+  **Common sizes**: `1024x1024`, `1024x768`, `768x1024`, `1280x720`, `720x1280`
+</ParamField>
+
+<ParamField body="n" type="integer" default="1">
+  Number of images to generate (1-10).
+</ParamField>
+
+<ParamField body="response_format" type="string" default="url">
+  Format for returned images.
+  
+  **Options**:
+  - `url` - Returns a URL to the hosted image
+  - `b64_json` - Returns base64-encoded image data
+</ParamField>
+
+<ParamField body="seed" type="integer">
+  Random seed for reproducible generation. Use the same seed with identical parameters for consistent results.
+</ParamField>
+
+## Response
+
+<ResponseField name="created" type="integer">
+  Unix timestamp of when the image was generated
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Array of generated images
+  
+  <Expandable title="data item properties">
+    <ResponseField name="url" type="string">
+      URL to the generated image (when `response_format: "url"`)
+    </ResponseField>
+    
+    <ResponseField name="b64_json" type="string">
+      Base64-encoded image data (when `response_format: "b64_json"`)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  The model that was used for generation
+</ResponseField>
+
+## Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "a red apple on a wooden table",
+    "size": "1024x1024",
+    "response_format": "url",
+    "n": 1
+  }'
+```
+
+```python Python
+import requests
+import os
+
+response = requests.post(
+    "http://74.81.65.159:30371/v1/images/generations",
+    headers={
+        "X-API-Key": os.environ["NUNCHAKU_API_KEY"],
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "nunchaku-qwen-image",
+        "tier": "fast",
+        "prompt": "a red apple on a wooden table",
+        "size": "1024x1024",
+        "response_format": "url"
+    }
+)
+
+result = response.json()
+image_url = result["data"][0]["url"]
+print(f"Generated image: {image_url}")
+```
+
+```javascript JavaScript
+const response = await fetch(
+  "http://74.81.65.159:30371/v1/images/generations",
+  {
+    method: "POST",
+    headers: {
+      "X-API-Key": process.env.NUNCHAKU_API_KEY,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "nunchaku-qwen-image",
+      tier: "fast",
+      prompt: "a red apple on a wooden table",
+      size: "1024x1024",
+      response_format: "url"
+    })
+  }
+);
+
+const result = await response.json();
+const imageUrl = result.data[0].url;
+console.log(`Generated image: ${imageUrl}`);
+```
+
+```go Go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "net/http"
+    "os"
+)
+
+func main() {
+    body := map[string]interface{}{
+        "model":           "nunchaku-qwen-image",
+        "tier":            "fast",
+        "prompt":          "a red apple on a wooden table",
+        "size":            "1024x1024",
+        "response_format": "url",
+    }
+    
+    jsonBody, _ := json.Marshal(body)
+    
+    req, _ := http.NewRequest(
+        "POST",
+        "http://74.81.65.159:30371/v1/images/generations",
+        bytes.NewBuffer(jsonBody),
+    )
+    
+    req.Header.Set("X-API-Key", os.Getenv("NUNCHAKU_API_KEY"))
+    req.Header.Set("Content-Type", "application/json")
+    
+    client := &http.Client{}
+    resp, _ := client.Do(req)
+    defer resp.Body.Close()
+    
+    var result map[string]interface{}
+    json.NewDecoder(resp.Body).Decode(&result)
+    
+    data := result["data"].([]interface{})
+    imageUrl := data[0].(map[string]interface{})["url"].(string)
+    fmt.Printf("Generated image: %s\n", imageUrl)
+}
+```
+
+</CodeGroup>
+
+### Response example (URL format)
+
+```json
+{
+  "created": 1234567890,
+  "data": [
+    {
+      "url": "https://example.com/generated-image.png"
+    }
+  ],
+  "model": "nunchaku-qwen-image"
+}
+```
+
+### Response example (Base64 format)
+
+```json
+{
+  "created": 1234567890,
+  "data": [
+    {
+      "b64_json": "iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAYAAAB/HSuDAAAACXBIWXMAAA7EAAAOxAGVKw4b..."
+    }
+  ],
+  "model": "nunchaku-qwen-image"
+}
+```
+
+### Saving base64 image to file
+
+```bash
+# Using jq and base64 to decode and save
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "a red apple on a wooden table",
+    "response_format": "b64_json"
+  }' | jq -r '.data[0].b64_json' | base64 -d > output.png
+```
+
+## Error responses
+
+<ResponseExample>
+```json 400 - Invalid Request
+{
+  "error": {
+    "message": "Invalid model 'invalid-model'. See /v1/models for available models.",
+    "type": "invalid_request_error",
+    "code": "invalid_model"
+  }
+}
+```
+
+```json 401 - Unauthorized
+{
+  "error": {
+    "message": "Invalid API key provided",
+    "type": "authentication_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+```json 429 - Rate Limit
+{
+  "error": {
+    "message": "Rate limit exceeded. Please try again later.",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+</ResponseExample>
+
+## Common use cases
+
+<AccordionGroup>
+  <Accordion title="Product photography" icon="camera">
+    Generate professional product images for e-commerce and marketing.
+    
+    ```json
+    {
+      "model": "nunchaku-qwen-image",
+      "tier": "fast",
+      "prompt": "professional product photo of sleek wireless headphones, white background, studio lighting, high resolution, commercial quality",
+      "size": "1024x1024"
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Marketing visuals" icon="megaphone">
+    Create eye-catching visuals for social media and advertising.
+    
+    ```json
+    {
+      "model": "nunchaku-flux.2-klein-9b",
+      "tier": "faster",
+      "prompt": "vibrant social media post background with abstract geometric shapes in brand colors, modern minimalist design",
+      "size": "1024x1024"
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Concept art" icon="palette">
+    Generate concept art and creative visualizations.
+    
+    ```json
+    {
+      "model": "nunchaku-qwen-image",
+      "tier": "normal",
+      "prompt": "futuristic cityscape at sunset, flying vehicles, neon lights, cyberpunk aesthetic, detailed architecture, digital art",
+      "size": "1280x720"
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Batch generation" icon="layer-group">
+    Generate multiple variations using different seeds.
+    
+    ```bash
+    # Generate 3 variations
+    for seed in 42 123 456; do
+      curl -X POST http://74.81.65.159:30371/v1/images/generations \
+        -H "X-API-Key: YOUR_API_KEY" \
+        -H "Content-Type: application/json" \
+        -d "{
+          \"model\": \"nunchaku-qwen-image\",
+          \"prompt\": \"abstract art with vibrant colors\",
+          \"seed\": $seed
+        }"
+    done
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Best practices
+
+<Tip>
+  **Prompt engineering tips**:
+  - Be specific about style, lighting, and composition
+  - Include relevant details like colors, materials, atmosphere
+  - Mention artistic style or reference when relevant
+  - Use natural, descriptive language
+</Tip>
+
+<Warning>
+  **Performance considerations**:
+  - Start with `tier: "fast"` for balanced performance
+  - Use `radically_fast` or `faster` for real-time applications
+  - Use `normal` only when maximum quality is essential
+  - Larger images and multiple generations increase processing time
+</Warning>
+
+## Related resources
+
+<CardGroup cols={3}>
+  <Card title="Models" icon="layer-group" href="/concepts/models">
+    Model comparison and selection guide
+  </Card>
+  
+  <Card title="Performance Tiers" icon="gauge-high" href="/concepts/tiers">
+    Understanding speed/quality tradeoffs
+  </Card>
+  
+  <Card title="Examples" icon="code" href="/examples/text-to-image">
+    More code examples and use cases
+  </Card>
+</CardGroup>

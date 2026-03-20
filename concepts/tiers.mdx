@@ -1,0 +1,254 @@
+---
+title: "Performance Tiers"
+description: "Balance speed and quality with flexible performance tiers"
+---
+
+## Overview
+
+The Nunchaku Image API offers four performance tiers that let you choose the right balance between generation speed and output quality. Each tier uses different optimization techniques to achieve different performance characteristics.
+
+## Available tiers
+
+<CardGroup cols={2}>
+  <Card title="radically_fast" icon="bolt-lightning">
+    **Fastest generation**
+    
+    Ultra-optimized for speed with minimal processing time
+  </Card>
+  
+  <Card title="faster" icon="gauge-high">
+    **Very fast generation**
+    
+    Optimized for speed while maintaining good quality
+  </Card>
+  
+  <Card title="fast" icon="forward">
+    **Balanced performance** (Recommended)
+    
+    Good balance between speed and quality
+  </Card>
+  
+  <Card title="normal" icon="clock">
+    **Maximum quality**
+    
+    Slower generation with highest quality output
+  </Card>
+</CardGroup>
+
+## Tier comparison
+
+| Tier | Speed | Quality | Use Case | Relative Time |
+|------|-------|---------|----------|---------------|
+| `radically_fast` | Fastest | Good | Real-time apps, previews | ~1x |
+| `faster` | Very Fast | Better | Quick iterations, prototypes | ~1.5x |
+| `fast` | Fast | High | Production use, most projects | ~2x |
+| `normal` | Standard | Highest | Final outputs, hero images | ~3-4x |
+
+<Note>
+  Generation times are approximate and may vary based on prompt complexity, model choice, and current system load.
+</Note>
+
+## Using tiers in requests
+
+Specify the tier in your API request:
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "a beautiful mountain landscape",
+    "size": "1024x1024"
+  }'
+```
+
+## Tier availability by model
+
+Not all models support all tiers. Here's the compatibility matrix:
+
+### Text-to-image models
+
+| Model | radically_fast | faster | fast | normal |
+|-------|----------------|--------|------|--------|
+| `nunchaku-qwen-image` | ✅ | ✅ | ✅ | ✅ |
+| `nunchaku-flux.2-klein-9b` | ❌ | ✅ | ✅ | ✅ |
+| `nunchaku-flux.2-klein-4b` | ❌ | ✅ | ✅ | ✅ |
+| `nunchaku-z-image-turbo` | ❌ | ❌ | ✅ | ✅ |
+
+### Image-to-image (editing) models
+
+| Model | radically_fast | faster | fast | normal |
+|-------|----------------|--------|------|--------|
+| `nunchaku-qwen-image-edit` | ✅ | ✅ | ✅ | ✅ |
+| `nunchaku-qwen-image-edit-2509` | ✅ | ✅ | ✅ | ✅ |
+| `nunchaku-flux.2-klein-9b-edit` | ❌ | ✅ | ✅ | ✅ |
+| `nunchaku-flux.2-klein-4b-edit` | ❌ | ✅ | ✅ | ✅ |
+
+## Choosing the right tier
+
+<AccordionGroup>
+  <Accordion title="When to use radically_fast" icon="bolt-lightning">
+    Use `radically_fast` when:
+    - Building real-time applications
+    - Generating image previews
+    - Creating quick concept sketches
+    - Speed is the primary concern
+    - Iterating rapidly on ideas
+    
+    **Example use case**: Live image preview feature in a design tool
+    
+    ```bash
+    curl -X POST http://74.81.65.159:30371/v1/images/generations \
+      -H "X-API-Key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "nunchaku-qwen-image",
+        "tier": "radically_fast",
+        "prompt": "quick preview of a sunset scene"
+      }'
+    ```
+  </Accordion>
+  
+  <Accordion title="When to use faster" icon="gauge-high">
+    Use `faster` when:
+    - Prototyping and testing prompts
+    - Generating multiple variations quickly
+    - Building batch processing workflows
+    - Quality matters but speed is important
+    
+    **Example use case**: A/B testing different prompt variations
+    
+    ```bash
+    curl -X POST http://74.81.65.159:30371/v1/images/generations \
+      -H "X-API-Key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "nunchaku-flux.2-klein-9b",
+        "tier": "faster",
+        "prompt": "product mockup for testing"
+      }'
+    ```
+  </Accordion>
+  
+  <Accordion title="When to use fast (Recommended)" icon="forward">
+    Use `fast` when:
+    - Building production applications
+    - Need good quality at reasonable speed
+    - Serving end-user requests
+    - Cost-efficiency is important
+    - This is the default recommended tier
+    
+    **Example use case**: User-facing image generation feature
+    
+    ```bash
+    curl -X POST http://74.81.65.159:30371/v1/images/generations \
+      -H "X-API-Key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "nunchaku-qwen-image",
+        "tier": "fast",
+        "prompt": "professional product photograph"
+      }'
+    ```
+  </Accordion>
+  
+  <Accordion title="When to use normal" icon="clock">
+    Use `normal` when:
+    - Creating final, publication-ready images
+    - Maximum quality is essential
+    - Speed is not a constraint
+    - Creating hero images or key visuals
+    - Detail and refinement matter most
+    
+    **Example use case**: Marketing hero image for a campaign
+    
+    ```bash
+    curl -X POST http://74.81.65.159:30371/v1/images/generations \
+      -H "X-API-Key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "nunchaku-qwen-image",
+        "tier": "normal",
+        "prompt": "stunning hero image of a luxury product on marble surface with dramatic lighting"
+      }'
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Performance optimization tips
+
+<Tip>
+  **Start with `fast`**: It provides the best balance for most use cases. Move to `faster` or `radically_fast` only if you need more speed, or to `normal` if quality is paramount.
+</Tip>
+
+### Combining tiers with models
+
+Different model and tier combinations serve different needs:
+
+```bash
+# Maximum quality: Qwen + normal
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "normal",
+    "prompt": "detailed architectural rendering"
+  }'
+
+# Maximum speed: Klein 4B + faster
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-flux.2-klein-4b",
+    "tier": "faster",
+    "prompt": "simple icon design"
+  }'
+
+# Recommended balance: Qwen + fast
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "professional product photo"
+  }'
+```
+
+## Workflow recommendations
+
+<Steps>
+  <Step title="Development & Testing">
+    Use `faster` or `radically_fast` tiers to iterate quickly on prompts and test functionality
+  </Step>
+  
+  <Step title="Staging & QA">
+    Use `fast` tier to validate quality with realistic performance
+  </Step>
+  
+  <Step title="Production">
+    Use `fast` for most cases, `normal` for critical high-quality outputs
+  </Step>
+</Steps>
+
+## Error handling
+
+If you specify an unsupported tier for a model, the API will return an error:
+
+```json
+{
+  "error": {
+    "message": "Tier 'radically_fast' is not supported for model 'nunchaku-flux.2-klein-9b'",
+    "type": "invalid_request_error",
+    "code": "unsupported_tier"
+  }
+}
+```
+
+<Warning>
+  Always check the tier compatibility matrix above to ensure your chosen model supports the desired tier.
+</Warning>

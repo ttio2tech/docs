@@ -1,80 +1,173 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Generate your first AI image in under 5 minutes"
 ---
 
-## Get started in three steps
+## Get started with Nunchaku Image API
 
-Get your documentation site running locally and make your first customization.
+Follow this guide to make your first API request and generate an AI image.
 
-### Step 1: Set up your local environment
+### Step 1: Get your API key
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+<Card icon="key" title="Obtain your API key">
+  Contact your administrator or sign up to receive your API key. You'll use this key to authenticate all API requests.
+</Card>
 
-### Step 2: Deploy your changes
+<Note>
+  Keep your API key secure and never share it publicly. Treat it like a password.
+</Note>
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+### Step 2: Make your first request
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+Use this curl command to generate your first image:
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "a red apple on a wooden table",
+    "n": 1,
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > output.png
+```
 
-### Step 3: Go live
+<Warning>
+  Replace `YOUR_API_KEY` with your actual API key before running the command.
+</Warning>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+### Step 3: Understand the response
+
+The API returns a JSON response with the generated image. When using `response_format: "b64_json"`, the response looks like:
+
+```json
+{
+  "data": [
+    {
+      "b64_json": "iVBORw0KGgoAAAANSUhEUgAA..."
+    }
+  ],
+  "created": 1234567890,
+  "model": "nunchaku-qwen-image"
+}
+```
+
+The example above uses `jq` and `base64` to decode the base64 image data and save it to a file.
+
+## Alternative: URL response format
+
+You can also receive the image as a URL instead of base64:
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "a red apple on a wooden table",
+    "response_format": "url"
+  }'
+```
+
+Response:
+```json
+{
+  "data": [
+    {
+      "url": "https://example.com/generated-image.png"
+    }
+  ]
+}
+```
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
+Now that you've generated your first image, explore more advanced features:
 
 <CardGroup cols={2}>
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
+<Card title="Try image editing" icon="paintbrush" href="/api-reference/image-to-image">
+  Transform existing images with text prompts.
 </Card>
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
+<Card title="Explore models" icon="layer-group" href="/concepts/models">
+  Learn about different model options and their strengths.
 </Card>
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
+<Card title="Understand tiers" icon="gauge-high" href="/concepts/tiers">
+  Choose the right speed/quality balance for your needs.
 </Card>
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
+<Card title="View all parameters" icon="sliders" href="/concepts/parameters">
+  Master all available request parameters.
 </Card>
 
 </CardGroup>
 
+## Common use cases
+
+<AccordionGroup>
+  <Accordion title="Generate product mockups" icon="box">
+    Use the API to create product visualization images for e-commerce, marketing materials, or presentations.
+    
+    ```bash
+    curl -X POST http://74.81.65.159:30371/v1/images/generations \
+      -H "X-API-Key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "nunchaku-flux.2-klein-9b",
+        "tier": "faster",
+        "prompt": "professional product photo of a sleek wireless headphone on white background",
+        "size": "1024x1024"
+      }'
+    ```
+  </Accordion>
+  
+  <Accordion title="Edit existing images" icon="wand-magic-sparkles">
+    Transform photos by adding, removing, or modifying elements using natural language.
+    
+    ```bash
+    # First, encode your image to base64
+    IMG_B64=$(base64 -w 0 input.png)
+    
+    # Then send the edit request
+    curl -X POST http://74.81.65.159:30371/v1/images/edits \
+      -H "X-API-Key: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d "{
+        \"model\": \"nunchaku-qwen-image-edit\",
+        \"tier\": \"fast\",
+        \"prompt\": \"add a sun in the sky\",
+        \"url\": \"data:image/png;base64,${IMG_B64}\",
+        \"size\": \"1024x1024\"
+      }"
+    ```
+  </Accordion>
+  
+  <Accordion title="Batch generation" icon="grid">
+    Generate multiple variations by changing the seed parameter or adjusting prompts.
+    
+    ```bash
+    # Generate 3 variations with different seeds
+    for seed in 42 123 456; do
+      curl -X POST http://74.81.65.159:30371/v1/images/generations \
+        -H "X-API-Key: YOUR_API_KEY" \
+        -H "Content-Type: application/json" \
+        -d "{
+          \"model\": \"nunchaku-qwen-image\",
+          \"prompt\": \"abstract art with vibrant colors\",
+          \"seed\": $seed
+        }" | jq -r '.data[0].b64_json' | base64 -d > "output_${seed}.png"
+    done
+    ```
+  </Accordion>
+</AccordionGroup>
+
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  **Need help?** Check out the [full API reference](/api-reference/introduction) or explore [code examples](/examples/text-to-image).
 </Note>

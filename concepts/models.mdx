@@ -1,0 +1,217 @@
+---
+title: "Models"
+description: "Choose the right AI model for your image generation needs"
+---
+
+## Available models
+
+The Nunchaku Image API offers several state-of-the-art AI models for image generation and editing. Each model has unique characteristics optimized for different use cases.
+
+## Text-to-image models
+
+### Qwen Image
+
+High-quality image generation with excellent prompt understanding and detail rendering.
+
+<Card title="nunchaku-qwen-image" icon="sparkles">
+  **Best for**: High-quality generation, complex prompts, detailed scenes
+  
+  **Supported tiers**: radically_fast, faster, fast, normal
+  
+  **Strengths**:
+  - Superior prompt comprehension
+  - Rich detail and texture
+  - Consistent output quality
+  - Supports all speed tiers
+</Card>
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "a red apple on a wooden table",
+    "size": "1024x1024"
+  }'
+```
+
+### FLUX Klein 9B
+
+Powerful 9-billion parameter model balancing quality and speed.
+
+<Card title="nunchaku-flux.2-klein-9b" icon="bolt">
+  **Best for**: Balanced performance, versatile generation
+  
+  **Supported tiers**: faster, fast, normal
+  
+  **Strengths**:
+  - Fast generation times
+  - Good quality output
+  - Efficient resource usage
+  - Strong prompt adherence
+</Card>
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-flux.2-klein-9b",
+    "tier": "fast",
+    "prompt": "a red apple on a wooden table",
+    "size": "1024x1024"
+  }'
+```
+
+### FLUX Klein 4B
+
+Lightweight 4-billion parameter model optimized for speed.
+
+<Card title="nunchaku-flux.2-klein-4b" icon="rocket">
+  **Best for**: Fast generation, simple prompts, high throughput
+  
+  **Supported tiers**: faster, fast, normal
+  
+  **Strengths**:
+  - Ultra-fast generation
+  - Lower resource requirements
+  - Good for simple scenes
+  - High throughput capability
+</Card>
+
+### Z-Image Turbo
+
+Ultra-fast generation model optimized for speed.
+
+<Card title="nunchaku-z-image-turbo" icon="gauge-high">
+  **Best for**: Rapid prototyping, real-time applications
+  
+  **Supported tiers**: fast, normal
+  
+  **Strengths**:
+  - Fastest generation times
+  - Low latency
+  - Suitable for real-time use
+</Card>
+
+## Image-to-image (editing) models
+
+### Qwen Image Edit
+
+Edit and transform existing images with natural language instructions.
+
+<CardGroup cols={2}>
+  <Card title="nunchaku-qwen-image-edit" icon="paintbrush">
+    Standard editing model with excellent instruction following
+    
+    **Supported tiers**: All tiers
+  </Card>
+  
+  <Card title="nunchaku-qwen-image-edit-2509" icon="wand-magic-sparkles">
+    Enhanced 2509 variant with improved capabilities
+    
+    **Supported tiers**: All tiers
+  </Card>
+</CardGroup>
+
+```bash
+# Encode your input image
+IMG_B64=$(base64 -w 0 input.png)
+
+# Send edit request
+curl -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add a sun in the sky\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"size\": \"1024x1024\"
+  }"
+```
+
+### FLUX Klein Edit Models
+
+Fast and efficient image editing with FLUX Klein variants.
+
+<CardGroup cols={2}>
+  <Card title="nunchaku-flux.2-klein-9b-edit" icon="paintbrush">
+    9B parameter editing model
+    
+    **Supported tiers**: faster, fast, normal
+  </Card>
+  
+  <Card title="nunchaku-flux.2-klein-4b-edit" icon="paintbrush">
+    4B parameter editing model
+    
+    **Supported tiers**: faster, fast, normal
+  </Card>
+</CardGroup>
+
+## Model comparison
+
+| Model | Parameters | Speed | Quality | Best Use Case |
+|-------|-----------|-------|---------|---------------|
+| **Qwen Image** | Large | Medium | Highest | Complex, detailed images |
+| **FLUX Klein 9B** | 9B | Fast | High | Balanced performance |
+| **FLUX Klein 4B** | 4B | Very Fast | Good | Simple, rapid generation |
+| **Z-Image Turbo** | - | Fastest | Good | Real-time applications |
+
+## Choosing the right model
+
+<AccordionGroup>
+  <Accordion title="For highest quality" icon="star">
+    Choose **nunchaku-qwen-image** when you need:
+    - Maximum detail and realism
+    - Complex scene composition
+    - Superior prompt understanding
+    - Best overall quality
+  </Accordion>
+  
+  <Accordion title="For balanced performance" icon="scale-balanced">
+    Choose **nunchaku-flux.2-klein-9b** when you need:
+    - Good quality with faster generation
+    - Versatile use cases
+    - Efficient resource usage
+    - Reliable, consistent output
+  </Accordion>
+  
+  <Accordion title="For maximum speed" icon="bolt">
+    Choose **nunchaku-flux.2-klein-4b** or **nunchaku-z-image-turbo** when you need:
+    - Fastest possible generation
+    - High throughput
+    - Real-time applications
+    - Simple image requirements
+  </Accordion>
+  
+  <Accordion title="For image editing" icon="paintbrush">
+    Choose **qwen-image-edit** models when you need:
+    - Best editing quality
+    - Complex transformations
+    - Precise instruction following
+    
+    Choose **flux-klein-edit** models when you need:
+    - Faster editing
+    - Good quality edits
+    - Higher throughput
+  </Accordion>
+</AccordionGroup>
+
+## Model variants
+
+Some models offer multiple variants optimized for different scenarios:
+
+### Base variants
+- Standard models with default capabilities
+- Examples: `nunchaku-flux.2-klein-9b-base`, `nunchaku-flux.2-klein-4b-base`
+
+### Edit variants
+- Specialized for image-to-image transformation
+- Examples: `nunchaku-qwen-image-edit-2509`, `nunchaku-flux.2-klein-9b-edit`
+
+<Tip>
+  Start with `nunchaku-qwen-image` with the `fast` tier for a good balance of quality and speed, then adjust based on your specific needs.
+</Tip>

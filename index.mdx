@@ -1,97 +1,96 @@
 ---
 title: "Introduction"
-description: "Welcome to the new home for your documentation"
+description: "Generate stunning images with AI-powered models via a simple REST API"
 ---
 
-## Setting up
+## Welcome to Nunchaku Image API
 
-Get your documentation site up and running in minutes.
+The Nunchaku Image API provides access to state-of-the-art AI image generation models through a simple, OpenAI-compatible REST API. Generate high-quality images from text descriptions or edit existing images with natural language prompts.
 
 <Card
-  title="Start here"
+  title="Get started in minutes"
   icon="rocket"
   href="/quickstart"
   horizontal
 >
-  Follow our three step quickstart guide.
+  Follow our quickstart guide to generate your first image.
 </Card>
 
-## Make it yours
+## Powerful features
 
-Design a docs site that looks great and empowers your users.
+<CardGroup cols={2}>
+  <Card
+    title="Text-to-image generation"
+    icon="wand-magic-sparkles"
+    href="/api-reference/text-to-image"
+  >
+    Create images from text descriptions using advanced AI models.
+  </Card>
+  <Card
+    title="Image-to-image editing"
+    icon="paintbrush"
+    href="/api-reference/image-to-image"
+  >
+    Transform existing images with natural language instructions.
+  </Card>
+  <Card
+    title="Multiple model options"
+    icon="layer-group"
+    href="/concepts/models"
+  >
+    Choose from Qwen Image, FLUX Klein, and Z-Image Turbo models.
+  </Card>
+  <Card
+    title="Flexible speed tiers"
+    icon="gauge-high"
+    href="/concepts/tiers"
+  >
+    Balance speed and quality with four performance tiers.
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+## Available models
 
-## Create beautiful pages
+<AccordionGroup>
+  <Accordion title="Qwen Image" icon="sparkles">
+    High-quality image generation and editing with support for all speed tiers. Includes both base and 2509 variants.
+    - **Text-to-image**: `nunchaku-qwen-image`
+    - **Image editing**: `nunchaku-qwen-image-edit`, `nunchaku-qwen-image-edit-2509`
+  </Accordion>
+  
+  <Accordion title="FLUX Klein" icon="bolt">
+    Fast and efficient generation with 4B and 9B parameter variants.
+    - **Text-to-image**: `nunchaku-flux.2-klein-4b`, `nunchaku-flux.2-klein-9b`
+    - **Image editing**: `nunchaku-flux.2-klein-4b-edit`, `nunchaku-flux.2-klein-9b-edit`
+  </Accordion>
+  
+  <Accordion title="Z-Image Turbo" icon="rocket">
+    Ultra-fast generation optimized for speed.
+    - **Text-to-image**: `nunchaku-z-image-turbo`
+  </Accordion>
+</AccordionGroup>
 
-Everything you need to create world-class documentation.
+## Quick example
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+Generate your first image with a simple curl command:
 
-## Need inspiration?
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "a serene mountain landscape at sunset",
+    "size": "1024x1024",
+    "response_format": "b64_json"
+  }'
+```
 
 <Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
+  title="View full API reference"
+  icon="code"
+  href="/api-reference/introduction"
 >
-  Browse our showcase of exceptional documentation sites.
+  Explore detailed endpoint documentation and parameters.
 </Card>

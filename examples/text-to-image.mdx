@@ -1,0 +1,541 @@
+---
+title: "Text-to-Image Examples"
+description: "Practical examples for generating images from text"
+---
+
+## Getting started
+
+This page provides practical examples for generating images from text descriptions using different models, tiers, and configurations.
+
+## Basic generation
+
+### Simple image generation
+
+The most basic request to generate an image:
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "prompt": "a red apple on a wooden table"
+  }'
+```
+
+This uses default values:
+- `tier`: `fast`
+- `size`: `1024x1024`
+- `n`: `1`
+- `response_format`: `url`
+
+### With all parameters specified
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "professional product photo of red wireless headphones on white background with soft studio lighting",
+    "size": "1024x1024",
+    "n": 1,
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > output.png
+```
+
+## Model-specific examples
+
+### Qwen Image (Highest Quality)
+
+Best for detailed, high-quality images with complex prompts:
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "normal",
+    "prompt": "stunning architectural photograph of a modern glass building at sunset, dramatic golden hour lighting, professional photography, high detail",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > qwen-architectural.png
+```
+
+### FLUX Klein 9B (Balanced Performance)
+
+Good balance of quality and speed:
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-flux.2-klein-9b",
+    "tier": "fast",
+    "prompt": "cozy coffee shop interior with vintage furniture and warm lighting",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > flux9b-coffeeshop.png
+```
+
+### FLUX Klein 4B (Maximum Speed)
+
+Fastest generation for simple images:
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-flux.2-klein-4b",
+    "tier": "faster",
+    "prompt": "simple icon of a rocket ship, minimalist design",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > flux4b-icon.png
+```
+
+### Z-Image Turbo (Ultra-Fast)
+
+Ultra-fast generation for real-time applications:
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-z-image-turbo",
+    "tier": "fast",
+    "prompt": "abstract background with geometric shapes",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > zimage-abstract.png
+```
+
+## Tier comparison examples
+
+### Same prompt, different tiers
+
+Compare quality vs. speed tradeoffs:
+
+```bash
+# Radically fast - fastest generation
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "radically_fast",
+    "prompt": "a red apple on a wooden table",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > apple-radically-fast.png
+
+# Fast - balanced (recommended)
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "a red apple on a wooden table",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > apple-fast.png
+
+# Normal - highest quality
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "normal",
+    "prompt": "a red apple on a wooden table",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > apple-normal.png
+```
+
+## Different image sizes
+
+### Square images
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "prompt": "a serene zen garden",
+    "size": "1024x1024"
+  }'
+```
+
+### Landscape images
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "prompt": "panoramic mountain landscape at sunrise",
+    "size": "1280x720"
+  }'
+```
+
+### Portrait images
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "prompt": "tall skyscraper reaching into the clouds",
+    "size": "720x1280"
+  }'
+```
+
+## Use case examples
+
+### Product photography
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "professional product photo of sleek wireless earbuds, white background, studio lighting, high resolution, commercial quality, floating composition",
+    "size": "1024x1024",
+    "response_format": "b64_json"
+  }' | jq -r '.data[0].b64_json' | base64 -d > product-earbuds.png
+```
+
+### Social media graphics
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-flux.2-klein-9b",
+    "tier": "faster",
+    "prompt": "vibrant Instagram post background with abstract geometric shapes in pastel colors, modern minimalist design, trendy aesthetic",
+    "size": "1024x1024",
+    "response_format": "b64_json"
+  }' | jq -r '.data[0].b64_json' | base64 -d > social-background.png
+```
+
+### Concept art
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "normal",
+    "prompt": "futuristic cyberpunk cityscape at night, neon lights, flying vehicles, rain-slicked streets, detailed architecture, blade runner aesthetic, concept art",
+    "size": "1280x720",
+    "response_format": "b64_json"
+  }' | jq -r '.data[0].b64_json' | base64 -d > concept-cyberpunk.png
+```
+
+### Logo and icon design
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-flux.2-klein-4b",
+    "tier": "faster",
+    "prompt": "modern minimalist logo for a tech startup, simple geometric shapes, blue and white color scheme, professional, clean design",
+    "size": "1024x1024",
+    "response_format": "b64_json"
+  }' | jq -r '.data[0].b64_json' | base64 -d > logo-design.png
+```
+
+## Batch generation
+
+### Generate multiple variations
+
+```bash
+#!/bin/bash
+
+PROMPT="abstract art with vibrant colors and dynamic composition"
+
+# Generate 5 variations with different seeds
+for seed in 42 123 456 789 1024; do
+  echo "Generating variation with seed ${seed}..."
+  curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+    -H "X-API-Key: YOUR_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"model\": \"nunchaku-qwen-image\",
+      \"tier\": \"fast\",
+      \"prompt\": \"${PROMPT}\",
+      \"size\": \"1024x1024\",
+      \"response_format\": \"b64_json\",
+      \"seed\": ${seed}
+    }" | jq -r '.data[0].b64_json' | base64 -d > "variation_${seed}.png"
+  echo "Saved variation_${seed}.png"
+done
+```
+
+### Generate with multiple prompts
+
+```bash
+#!/bin/bash
+
+# Array of prompts
+prompts=(
+  "a red apple on a wooden table"
+  "a green pear on a marble counter"
+  "a yellow banana on a ceramic plate"
+  "an orange on a rustic wooden board"
+)
+
+# Generate images for each prompt
+for i in "${!prompts[@]}"; do
+  echo "Generating image $((i+1))/${#prompts[@]}..."
+  curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+    -H "X-API-Key: YOUR_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"model\": \"nunchaku-flux.2-klein-9b\",
+      \"tier\": \"faster\",
+      \"prompt\": \"${prompts[$i]}\",
+      \"response_format\": \"b64_json\"
+    }" | jq -r '.data[0].b64_json' | base64 -d > "fruit_${i}.png"
+done
+```
+
+## Programming language examples
+
+<CodeGroup>
+
+```python Python
+import requests
+import base64
+import os
+
+def generate_image(prompt, model="nunchaku-qwen-image", tier="fast", size="1024x1024", seed=None):
+    """Generate an image and save it to a file."""
+    payload = {
+        "model": model,
+        "tier": tier,
+        "prompt": prompt,
+        "size": size,
+        "response_format": "b64_json"
+    }
+    
+    if seed is not None:
+        payload["seed"] = seed
+    
+    response = requests.post(
+        "http://74.81.65.159:30371/v1/images/generations",
+        headers={
+            "X-API-Key": os.environ["NUNCHAKU_API_KEY"],
+            "Content-Type": "application/json"
+        },
+        json=payload
+    )
+    
+    result = response.json()
+    image_b64 = result["data"][0]["b64_json"]
+    
+    # Decode and return image data
+    return base64.b64decode(image_b64)
+
+# Generate multiple variations
+prompts = [
+    "a red apple on a wooden table",
+    "a modern office workspace",
+    "abstract colorful background"
+]
+
+for i, prompt in enumerate(prompts):
+    print(f"Generating image {i+1}/{len(prompts)}...")
+    image_data = generate_image(prompt, seed=42+i)
+    
+    with open(f"output_{i}.png", "wb") as f:
+        f.write(image_data)
+    
+    print(f"Saved output_{i}.png")
+```
+
+```javascript JavaScript
+import fetch from 'node-fetch';
+import fs from 'fs';
+
+async function generateImage(prompt, options = {}) {
+  const {
+    model = 'nunchaku-qwen-image',
+    tier = 'fast',
+    size = '1024x1024',
+    seed = null
+  } = options;
+  
+  const payload = {
+    model,
+    tier,
+    prompt,
+    size,
+    response_format: 'b64_json'
+  };
+  
+  if (seed !== null) {
+    payload.seed = seed;
+  }
+  
+  const response = await fetch(
+    'http://74.81.65.159:30371/v1/images/generations',
+    {
+      method: 'POST',
+      headers: {
+        'X-API-Key': process.env.NUNCHAKU_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }
+  );
+  
+  const result = await response.json();
+  const imageB64 = result.data[0].b64_json;
+  
+  return Buffer.from(imageB64, 'base64');
+}
+
+// Generate multiple variations
+const prompts = [
+  'a red apple on a wooden table',
+  'a modern office workspace',
+  'abstract colorful background'
+];
+
+for (let i = 0; i < prompts.length; i++) {
+  console.log(`Generating image ${i+1}/${prompts.length}...`);
+  
+  const imageBuffer = await generateImage(prompts[i], { seed: 42 + i });
+  fs.writeFileSync(`output_${i}.png`, imageBuffer);
+  
+  console.log(`Saved output_${i}.png`);
+}
+```
+
+</CodeGroup>
+
+## Advanced techniques
+
+### Reproducible generation
+
+Use the same seed for consistent results:
+
+```bash
+# These will generate similar (not identical) images
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "prompt": "a sunset over mountains",
+    "seed": 12345
+  }'
+
+# Same request again - similar output
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "prompt": "a sunset over mountains",
+    "seed": 12345
+  }'
+```
+
+### A/B testing prompts
+
+Test different prompt variations with the same seed:
+
+```bash
+# Version A
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "prompt": "product photo of headphones",
+    "seed": 42
+  }'
+
+# Version B - more descriptive
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "prompt": "professional product photo of wireless headphones on white background with studio lighting",
+    "seed": 42
+  }'
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Prompt engineering" icon="pen">
+    - Be specific and descriptive
+    - Include style, lighting, and composition details
+    - Mention materials, colors, and atmosphere
+    - Reference artistic styles when relevant
+    - Use natural language, avoid keyword stuffing
+  </Accordion>
+  
+  <Accordion title="Model selection" icon="layer-group">
+    - Use Qwen Image for highest quality and complex prompts
+    - Use FLUX Klein 9B for balanced performance
+    - Use FLUX Klein 4B or Z-Image Turbo for speed
+    - Consider your quality vs. speed requirements
+  </Accordion>
+  
+  <Accordion title="Performance optimization" icon="gauge">
+    - Start with `tier: "fast"` for most use cases
+    - Use `faster` or `radically_fast` for real-time apps
+    - Use `normal` only when maximum quality is essential
+    - Batch requests when generating multiple images
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Image-to-Image Examples" icon="paintbrush" href="/examples/image-to-image">
+    Learn how to edit existing images
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api-reference/text-to-image">
+    Complete API documentation
+  </Card>
+  
+  <Card title="Models Guide" icon="layer-group" href="/concepts/models">
+    Detailed model comparison
+  </Card>
+  
+  <Card title="Performance Tiers" icon="gauge-high" href="/concepts/tiers">
+    Understanding speed/quality tradeoffs
+  </Card>
+</CardGroup>

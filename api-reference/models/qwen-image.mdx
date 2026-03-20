@@ -1,0 +1,140 @@
+---
+title: "Qwen Image Models"
+description: "High-quality image generation and editing with Qwen models"
+---
+
+## Overview
+
+Qwen Image models provide the highest quality image generation and editing capabilities in the Nunchaku API. These models excel at understanding complex prompts and producing detailed, high-quality outputs.
+
+## Available models
+
+### Text-to-image
+
+<Card title="nunchaku-qwen-image" icon="sparkles">
+  **Primary text-to-image model**
+  
+  - Supports all performance tiers
+  - Superior prompt comprehension
+  - Excellent detail and texture rendering
+  - Best for complex, detailed scenes
+</Card>
+
+### Image editing
+
+<CardGroup cols={2}>
+  <Card title="nunchaku-qwen-image-edit" icon="paintbrush">
+    **Standard editing model**
+    
+    - Supports all performance tiers
+    - High-quality transformations
+    - Natural instruction following
+  </Card>
+  
+  <Card title="nunchaku-qwen-image-edit-2509" icon="wand-magic-sparkles">
+    **Enhanced 2509 variant**
+    
+    - Supports all performance tiers
+    - Improved editing capabilities
+    - Better instruction adherence
+  </Card>
+</CardGroup>
+
+## Performance characteristics
+
+| Tier | Generation Time | Quality | Best Use Case |
+|------|----------------|---------|---------------|
+| `radically_fast` | ~1-2s | Good | Quick previews, iterations |
+| `faster` | ~2-3s | Better | Rapid prototyping |
+| `fast` | ~3-5s | High | Production use (recommended) |
+| `normal` | ~6-10s | Highest | Final outputs, hero images |
+
+<Note>
+  Times are approximate and may vary based on prompt complexity and system load.
+</Note>
+
+## Example usage
+
+### Text-to-image generation
+
+```bash
+curl -s -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "professional product photo of sleek wireless headphones, white background, studio lighting, commercial quality",
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }' | jq -r '.data[0].b64_json' | base64 -d > qwen-headphones.png
+```
+
+### Image editing
+
+```bash
+IMG_B64=$(base64 -w 0 input.png)
+
+curl -s -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add a bright sun in the sky and enhance the colors to be more vibrant\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"size\": \"1024x1024\",
+    \"response_format\": \"b64_json\"
+  }" | jq -r '.data[0].b64_json' | base64 -d > qwen-edited.png
+```
+
+## Best for
+
+<AccordionGroup>
+  <Accordion title="Complex scenes" icon="mountain">
+    Qwen models excel at generating images with multiple elements, complex compositions, and detailed environments.
+  </Accordion>
+  
+  <Accordion title="Photorealistic outputs" icon="camera">
+    Achieve the highest level of realism and detail for product photos, portraits, and landscapes.
+  </Accordion>
+  
+  <Accordion title="Detailed transformations" icon="wand-magic">
+    Handle complex editing instructions with multiple changes and sophisticated transformations.
+  </Accordion>
+  
+  <Accordion title="Professional work" icon="briefcase">
+    Ideal for production-ready images that require maximum quality and polish.
+  </Accordion>
+</AccordionGroup>
+
+## Tips for best results
+
+<Tip>
+  **Prompt engineering**: Qwen models understand detailed, descriptive prompts. Include specifics about style, lighting, composition, colors, materials, and atmosphere for best results.
+</Tip>
+
+<Tip>
+  **Tier selection**: Start with `tier: "fast"` for a good balance. Use `normal` when maximum quality is essential for final outputs.
+</Tip>
+
+<Tip>
+  **Image editing**: Be specific about what to change, add, or remove. Qwen models can handle complex multi-part instructions.
+</Tip>
+
+## Related resources
+
+<CardGroup cols={3}>
+  <Card title="Models Overview" icon="layer-group" href="/concepts/models">
+    Compare all available models
+  </Card>
+  
+  <Card title="Performance Tiers" icon="gauge-high" href="/concepts/tiers">
+    Understanding tier options
+  </Card>
+  
+  <Card title="Examples" icon="code" href="/examples/text-to-image">
+    View code examples
+  </Card>
+</CardGroup>

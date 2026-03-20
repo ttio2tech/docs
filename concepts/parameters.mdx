@@ -1,0 +1,352 @@
+---
+title: "Parameters"
+description: "Comprehensive guide to all API request parameters"
+---
+
+## Request parameters
+
+This page documents all parameters available when making image generation and editing requests.
+
+## Common parameters
+
+These parameters are available for both text-to-image and image-to-image requests.
+
+### model
+
+<ParamField path="model" type="string" required>
+  The AI model to use for generation. See the [Models](/concepts/models) page for available options.
+  
+  **Text-to-image models**:
+  - `nunchaku-qwen-image`
+  - `nunchaku-flux.2-klein-9b`
+  - `nunchaku-flux.2-klein-4b`
+  - `nunchaku-z-image-turbo`
+  
+  **Image-to-image models**:
+  - `nunchaku-qwen-image-edit`
+  - `nunchaku-qwen-image-edit-2509`
+  - `nunchaku-flux.2-klein-9b-edit`
+  - `nunchaku-flux.2-klein-4b-edit`
+</ParamField>
+
+### prompt
+
+<ParamField path="prompt" type="string" required>
+  A text description of the desired image. Be specific and descriptive for best results.
+  
+  **Best practices**:
+  - Be specific about subjects, styles, lighting, and composition
+  - Include relevant details like colors, materials, and atmosphere
+  - Mention artistic style or reference if desired
+  
+  **Examples**:
+  - `"a red apple on a wooden table with natural lighting"`
+  - `"professional product photo of wireless headphones, white background, studio lighting"`
+  - `"sunset over mountains, dramatic clouds, golden hour, landscape photography"`
+</ParamField>
+
+### tier
+
+<ParamField path="tier" type="string" default="fast">
+  Performance tier that controls the speed/quality tradeoff. See [Performance Tiers](/concepts/tiers) for details.
+  
+  **Options**:
+  - `radically_fast` - Fastest, good quality
+  - `faster` - Very fast, better quality
+  - `fast` - Balanced (recommended)
+  - `normal` - Slower, highest quality
+  
+  **Note**: Not all models support all tiers. Check the [tier availability matrix](/concepts/tiers#tier-availability-by-model).
+</ParamField>
+
+### size
+
+<ParamField path="size" type="string" default="1024x1024">
+  The dimensions of the generated image.
+  
+  **Common sizes**:
+  - `1024x1024` - Square (default)
+  - `1024x768` - Landscape 4:3
+  - `768x1024` - Portrait 3:4
+  - `1280x720` - Landscape 16:9
+  - `720x1280` - Portrait 9:16
+  
+  Format: `widthxheight` in pixels
+</ParamField>
+
+### n
+
+<ParamField path="n" type="integer" default="1">
+  The number of images to generate. Must be between 1 and 10.
+  
+  **Note**: Generating multiple images will increase processing time and costs proportionally.
+  
+  ```json
+  {
+    "model": "nunchaku-qwen-image",
+    "prompt": "a cat",
+    "n": 3
+  }
+  ```
+</ParamField>
+
+### response_format
+
+<ParamField path="response_format" type="string" default="url">
+  The format in which the generated image is returned.
+  
+  **Options**:
+  - `url` - Returns a URL to the hosted image (expires after a period)
+  - `b64_json` - Returns base64-encoded JSON data
+  
+  **URL format response**:
+  ```json
+  {
+    "data": [{
+      "url": "https://example.com/generated-image.png"
+    }]
+  }
+  ```
+  
+  **Base64 format response**:
+  ```json
+  {
+    "data": [{
+      "b64_json": "iVBORw0KGgoAAAANSUhEUgAA..."
+    }]
+  }
+  ```
+</ParamField>
+
+### seed
+
+<ParamField path="seed" type="integer">
+  Random seed for reproducible generation. Use the same seed with the same parameters to get consistent results.
+  
+  **Use cases**:
+  - Reproducible outputs for testing
+  - Creating variations with slight prompt changes
+  - Debugging and comparison
+  
+  ```json
+  {
+    "model": "nunchaku-qwen-image",
+    "prompt": "a sunset",
+    "seed": 42
+  }
+  ```
+  
+  **Note**: The same seed with the same model, prompt, and parameters should produce similar (but not pixel-identical) results.
+</ParamField>
+
+## Image-to-image specific parameters
+
+These parameters are only available for image editing endpoints (`/v1/images/edits`).
+
+### url
+
+<ParamField path="url" type="string" required>
+  The input image to edit. Can be provided as:
+  
+  **Data URI** (recommended):
+  ```json
+  {
+    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+  }
+  ```
+  
+  **HTTP(S) URL**:
+  ```json
+  {
+    "url": "https://example.com/input-image.png"
+  }
+  ```
+  
+  **Supported formats**: PNG, JPEG, WebP
+  
+  **Size limits**: Maximum 10MB
+</ParamField>
+
+### image
+
+<ParamField path="image" type="file">
+  Alternative to `url` parameter. Upload the image file directly as multipart/form-data.
+  
+  **Note**: Most implementations use the `url` parameter with data URIs for simplicity.
+</ParamField>
+
+## Complete examples
+
+### Text-to-image with all parameters
+
+```bash
+curl -X POST http://74.81.65.159:30371/v1/images/generations \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nunchaku-qwen-image",
+    "tier": "fast",
+    "prompt": "professional product photography of a sleek smartphone, white background, studio lighting, high resolution, commercial quality",
+    "n": 2,
+    "size": "1024x1024",
+    "response_format": "b64_json",
+    "seed": 42
+  }'
+```
+
+### Image-to-image with all parameters
+
+```bash
+# First, encode your image
+IMG_B64=$(base64 -w 0 input.png)
+
+# Then make the request
+curl -X POST http://74.81.65.159:30371/v1/images/edits \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"model\": \"nunchaku-qwen-image-edit\",
+    \"tier\": \"fast\",
+    \"prompt\": \"add a bright sun in the sky and enhance the colors to make it more vibrant\",
+    \"url\": \"data:image/png;base64,${IMG_B64}\",
+    \"n\": 1,
+    \"size\": \"1024x1024\",
+    \"response_format\": \"b64_json\",
+    \"seed\": 123
+  }"
+```
+
+## Parameter validation
+
+The API validates all parameters and returns descriptive errors for invalid values:
+
+### Invalid model error
+```json
+{
+  "error": {
+    "message": "Invalid model 'invalid-model'. See /v1/models for available models.",
+    "type": "invalid_request_error",
+    "code": "invalid_model"
+  }
+}
+```
+
+### Invalid tier error
+```json
+{
+  "error": {
+    "message": "Tier 'radically_fast' is not supported for model 'nunchaku-flux.2-klein-9b'",
+    "type": "invalid_request_error",
+    "code": "unsupported_tier"
+  }
+}
+```
+
+### Invalid size error
+```json
+{
+  "error": {
+    "message": "Invalid size '2048x2048'. Must be in format 'widthxheight'.",
+    "type": "invalid_request_error",
+    "code": "invalid_size"
+  }
+}
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Crafting effective prompts" icon="pen">
+    - Be specific and descriptive
+    - Include style, lighting, and composition details
+    - Mention subject details like colors, materials, textures
+    - Reference artistic styles when relevant
+    - Use natural language, not keyword stuffing
+    
+    **Good**: `"professional product photo of red wireless headphones on white background with soft studio lighting"`
+    
+    **Less effective**: `"headphones red product photo"`
+  </Accordion>
+  
+  <Accordion title="Choosing the right size" icon="expand">
+    - Use square (`1024x1024`) for general purpose
+    - Use landscape for wide scenes, banners
+    - Use portrait for vertical content, mobile
+    - Larger sizes take longer to generate
+    - Consider your use case and display requirements
+  </Accordion>
+  
+  <Accordion title="Using seeds effectively" icon="seedling">
+    - Set a seed for reproducible testing
+    - Use different seeds for variations
+    - Same seed ≈ same output (not pixel-perfect)
+    - Useful for A/B testing prompts
+    - Omit seed for random results each time
+  </Accordion>
+  
+  <Accordion title="Response format selection" icon="file-image">
+    - Use `url` for quick viewing and sharing
+    - Use `b64_json` for direct integration
+    - URLs may expire after a period
+    - Base64 increases response size
+    - Consider your storage and caching needs
+  </Accordion>
+</AccordionGroup>
+
+## Programming examples
+
+<CodeGroup>
+
+```python Python
+import requests
+import os
+
+def generate_image(prompt, model="nunchaku-qwen-image", tier="fast"):
+    response = requests.post(
+        "http://74.81.65.159:30371/v1/images/generations",
+        headers={
+            "X-API-Key": os.environ["NUNCHAKU_API_KEY"],
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": model,
+            "tier": tier,
+            "prompt": prompt,
+            "size": "1024x1024",
+            "response_format": "url",
+            "n": 1
+        }
+    )
+    return response.json()
+
+result = generate_image("a red apple on a wooden table")
+print(result["data"][0]["url"])
+```
+
+```javascript JavaScript
+async function generateImage(prompt, model = "nunchaku-qwen-image", tier = "fast") {
+  const response = await fetch("http://74.81.65.159:30371/v1/images/generations", {
+    method: "POST",
+    headers: {
+      "X-API-Key": process.env.NUNCHAKU_API_KEY,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      tier,
+      prompt,
+      size: "1024x1024",
+      response_format: "url",
+      n: 1
+    })
+  });
+  
+  const result = await response.json();
+  return result.data[0].url;
+}
+
+const imageUrl = await generateImage("a red apple on a wooden table");
+console.log(imageUrl);
+```
+
+</CodeGroup>
